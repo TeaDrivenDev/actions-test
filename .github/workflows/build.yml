@@ -1,12 +1,6 @@
 name: Build Maysternya
 
 on:
-  push:
-    branches:
-      - master
-#      - feature/builds # Temporary branch for testing builds
-  pull_request:
-  workflow_dispatch:
   release:
     types: [created]
 
@@ -21,8 +15,6 @@ jobs:
 #            rid: linux-x64
           - os: windows-latest
             rid: win-x64
-          #- os: macos-latest
-          #  rid: osx-x64
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -60,10 +52,15 @@ jobs:
           echo "Published to bin/publish/${{ matrix.rid }}"
           ls -al bin/publish/${{ matrix.rid }}
 
+      - uses: kzrnm/get-net-sdk-project-versions-action@v2
+        id: get-version
+        with:
+          proj-path: 'src/Maysternya/Maysternya.fsproj'
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: maysternya-${{ github.event.release.tag_name }}-${{ matrix.rid }}
+          name: maysternya-${{ steps.get-version.outputs.version }}-${{ matrix.rid }}
           path: bin/publish/${{ matrix.rid }}
           if-no-files-found: error
 
