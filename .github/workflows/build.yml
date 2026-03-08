@@ -51,12 +51,13 @@ jobs:
 
       - name: Update application version
         id: update-version
-        shell: bash
         uses: vers-one/dotnet-project-version-updater@v1.7
         with:
           file: ${{ env.PROJECT_PATH }}
           version: ${{ steps.get-version.outputs.group1 }}
 
+      - name: Commit new application version
+        shell: bash
         run: |
           git config user.name "TeaDrivenDev"
           git config user.email "TeaDrivenDev@gmail.com"
