@@ -42,10 +42,27 @@ jobs:
       - name: Restore
         run: dotnet restore ${{ env.PROJECT_PATH }}
 
+      - name: Get release version
+        id: get-version
+        uses: KyoriPowered/action-regex-match@v3
+        with:
+          text: ${{ github.event.release.tag_name }}
+          regex: '^release-(.+)'
+
       - name: Update application version
+        id: update-version
         shell: bash
+        uses: vers-one/dotnet-project-version-updater@v1.7
+        with:
+          file: ${{ env.PROJECT_PATH }}
+          version: ${{ steps.get-version.outputs.group1 }}
+
         run: |
-          sed -i "s/\(<Version>\(\.*\)<\/Version>\)/\1${{ github.event.release.tag_name }}/" ${{ env.PROJECT_PATH }}
+          git config user.name "TeaDrivenDev"
+          git config user.email "TeaDrivenDev@gmail.com"
+          git add .
+          git commit -m "build: Update project version to ${{ steps.update-version.outputs.newVersion }}"
+          git push
 
       - name: Publish self-contained
         shell: bash
@@ -63,15 +80,10 @@ jobs:
           echo "Published to bin/publish/${{ matrix.rid }}"
           ls -al bin/publish/${{ matrix.rid }}
 
-      - uses: kzrnm/get-net-sdk-project-versions-action@v2
-        id: get-version
-        with:
-          proj-path: ${{ env.PROJECT_PATH }}
-
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: maysternya-${{ steps.get-version.outputs.version }}-${{ matrix.rid }}
+          name: maysternya-${{ steps.update-version.outputs.newVersion }}-${{ matrix.rid }}
           path: bin/publish/${{ matrix.rid }}
           if-no-files-found: error
 
