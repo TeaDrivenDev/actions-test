@@ -65,6 +65,13 @@ jobs:
           git commit -m "build: Update project version to ${{ steps.update-version.outputs.newVersion }}"
           git push origin HEAD:trunk
 
+      - name: Update release tag
+        uses: richardsimko/update-tag@v1.0.9
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Publish self-contained
         shell: bash
         run: |
