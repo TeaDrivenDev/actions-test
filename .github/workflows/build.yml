@@ -7,6 +7,9 @@ on:
 permissions:
   contents: write
 
+env:
+  PROJECT_PATH: src/Maysternya/Maysternya.fsproj
+
 jobs:
   build:
     name: Build (${{ matrix.rid }})
@@ -37,14 +40,14 @@ jobs:
             ${{ runner.os }}-nuget-
 
       - name: Restore
-        run: dotnet restore src/Maysternya/Maysternya.fsproj
+        run: dotnet restore ${{ env.PROJECT_PATH }}
 
       - name: Publish self-contained
         shell: bash
         run: |
           set -euo pipefail
           # Base self-contained publish - no .NET runtime required
-          dotnet publish src/Maysternya/Maysternya.fsproj \
+          dotnet publish ${{ env.PROJECT_PATH }} \
             -c Release \
             -r ${{ matrix.rid }} \
             --self-contained true \
@@ -58,7 +61,7 @@ jobs:
       - uses: kzrnm/get-net-sdk-project-versions-action@v2
         id: get-version
         with:
-          proj-path: 'src/Maysternya/Maysternya.fsproj'
+          proj-path: ${{ env.PROJECT_PATH }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
