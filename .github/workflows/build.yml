@@ -42,6 +42,11 @@ jobs:
       - name: Restore
         run: dotnet restore ${{ env.PROJECT_PATH }}
 
+      - name: Update application version
+        shell: bash
+        run: |
+          sed -i "'s/\(<Version>\(\.*\)<\/Version>\)/\1${{ github.event.release.tag_name }}/'" ${{ env.PROJECT_PATH }}
+
       - name: Publish self-contained
         shell: bash
         run: |
